@@ -1,19 +1,17 @@
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectUser } from "../../features/user/userSlice";
 import { fetching, resolved, rejected } from "../../features/user/userSlice";
 import "./index.scss";
-import { useEffect, useState } from "react";
 
 function SignIn() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const status = useSelector(selectUser).status;
+    const loginError = useSelector(selectUser).error.login;
     const [submitting, setSubmitting] = useState(false);
-    const testParams = {
-        email: "steve@rogers.com",
-        password: "password456",
-    };
+    const loginUrl = "http://localhost:3001/api/v1/user/login";
 
     async function fetchLogin(params) {
         if (status === "pending" || status === "updating") {
@@ -21,31 +19,37 @@ function SignIn() {
         }
         dispatch(fetching());
         try {
-            const response = await fetch(
-                "http://localhost:3001/api/v1/user/login",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(params),
-                }
-            );
+            const response = await fetch(loginUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(params),
+            });
             const data = await response.json();
             if (data.status === 400) {
-                dispatch(rejected(data.message));
+                dispatch(rejected(data.status, data.message));
                 return;
             }
+            if (localStorage.getItem("jwt")) {
+                localStorage.removeItem("jwt");
+            }
+            localStorage.setItem("jwt", data.body.token);
             dispatch(resolved(data));
         } catch (error) {
             dispatch(rejected("Erreur réseau"));
         }
     }
 
-    const submitForm = async (event, params) => {
+    const onSubmit = async (event) => {
         event.preventDefault();
         setSubmitting(true);
-        await fetchLogin(params);
+        const form = event.currentTarget;
+        const userParams = {
+            email: form.elements.username.value,
+            password: form.elements.password.value,
+        };
+        await fetchLogin(userParams);
         setSubmitting(false);
     };
 
@@ -60,25 +64,21 @@ function SignIn() {
             <section className="sign-in-content">
                 <i className="fa fa-user-circle sign-in-icon"></i>
                 <h1>Sign In</h1>
-                <form>
+                <form onSubmit={onSubmit}>
                     <div className="input-wrapper">
-                        <label for="username">Username</label>
+                        <label htmlFor="username">Username</label>
                         <input type="text" id="username" />
                     </div>
                     <div className="input-wrapper">
-                        <label for="password">Password</label>
+                        <label htmlFor="password">Password</label>
                         <input type="password" id="password" />
                     </div>
+                    {loginError && <span>{loginError}</span>}
                     <div className="input-remember">
                         <input type="checkbox" id="remember-me" />
-                        <label for="remember-me">Remember me</label>
+                        <label htmlFor="remember-me">Remember me</label>
                     </div>
-                    <button
-                        className="sign-in-button"
-                        onClick={(event) => {
-                            submitForm(event, testParams);
-                        }}
-                    >
+                    <button type="submit" className="sign-in-button">
                         Sign In
                     </button>
                 </form>

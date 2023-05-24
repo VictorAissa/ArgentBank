@@ -1,18 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../features/user/userSlice";
-import { eraseData, resolved, rejected } from "../../features/user/userSlice";
+import { eraseData } from "../../features/user/userSlice";
 
 import logo from "../../assets/argentBankLogo.png";
 import "./index.scss";
 
 function Header() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const status = useSelector(selectUser).status;
 
-    const cleanState = (event) => {
+    const disconnect = (event) => {
         event.preventDefault();
         dispatch(eraseData());
+        localStorage.removeItem("jwt");
+        navigate("/");
     };
 
     return (
@@ -31,7 +34,7 @@ function Header() {
                         <Link
                             to="/"
                             className="main-nav-item"
-                            onClick={(event) => cleanState(event)}
+                            onClick={(event) => disconnect(event)}
                         >
                             <i className="fa fa-user-circle"></i>
                             <span>Sign Out</span>

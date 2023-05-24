@@ -1,3 +1,5 @@
+@import "../../utils/style/variables.scss";
+
 .user_container {
     display: flex;
     flex-direction: column;
@@ -6,8 +8,8 @@
         color: #fff;
         margin-bottom: 2rem;
         .edit-button {
-            border-color: #00bc77;
-            background-color: #00bc77;
+            border-color: $button;
+            background-color: $button;
             color: #fff;
             font-weight: bold;
             padding: 10px;

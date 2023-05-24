@@ -2,12 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     status: "void",
-    token: null,
-    email: null,
-    firstNane: null,
-    lastName: null,
+    // token: null,
     data: null,
-    error: null,
+    error: {
+        login: null,
+        profile: null,
+    },
 };
 
 // export function fetchLogin(params) {
@@ -44,13 +44,14 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        fetching: (draft, action) => {
+        fetching: (draft) => {
             if (draft.status === "void") {
                 draft.status = "pending";
                 return;
             }
             if (draft.status === "rejected") {
-                draft.error = null;
+                draft.error.login = null;
+                draft.error.profile = null;
                 draft.status = "pending";
                 return;
             }
@@ -63,33 +64,44 @@ const userSlice = createSlice({
         resolved: (draft, action) => {
             if (draft.status === "pending" || draft.status === "updating") {
                 if (action.payload.message === "User successfully logged in") {
-                    draft.token = action.payload.body.token;
+                    // draft.token = action.payload.body.token;
                     draft.status = "resolved";
                     return;
                 }
-                draft.data = action.payload;
+                draft.data = action.payload.body;
                 draft.status = "resolved";
                 return;
             }
             return;
         },
-        rejected: (draft, action) => {
-            if (draft.status === "pending" || draft.status === "updating") {
-                draft.error = action.payload;
-                draft.data = null;
-                draft.status = "rejected";
+        rejected: {
+            prepare: (code, message) => ({
+                payload: { code, message },
+            }),
+            reducer: (draft, action) => {
+                if (draft.status === "pending" || draft.status === "updating") {
+                    if (action.payload.code === 400) {
+                        draft.error.login = action.payload.message;
+                        draft.data = null;
+                        draft.status = "rejected";
+                        return;
+                    }
+                    if (action.payload.code === 401) {
+                        draft.error.profile = action.payload.message;
+                        draft.data = null;
+                        draft.status = "rejected";
+                        return;
+                    }
+                }
                 return;
-            }
-            return;
+            },
         },
         eraseData: (draft, action) => {
             draft.status = "void";
-            draft.token = null;
-            draft.email = null;
-            draft.firstNane = null;
-            draft.lastName = null;
+            // draft.token = null;
             draft.data = null;
-            draft.error = null;
+            draft.error.login = null;
+            draft.error.profile = null;
             return;
         },
     },
