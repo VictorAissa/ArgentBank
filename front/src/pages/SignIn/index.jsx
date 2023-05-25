@@ -3,23 +3,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectUser } from "../../features/user/userSlice";
 import { fetching, resolved, rejected } from "../../features/user/userSlice";
+import ErrorBox from "../../components/ErrorBox";
 import "./index.scss";
 
 function SignIn() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const status = useSelector(selectUser).status;
-    const loginError = useSelector(selectUser).error.login;
+    const error = useSelector(selectUser).error;
+    const loginError = error.login || error.other;
     const [submitting, setSubmitting] = useState(false);
     const loginUrl = "http://localhost:3001/api/v1/user/login";
 
-    async function fetchLogin(params) {
+    async function fetchLogin(url, params) {
         if (status === "pending" || status === "updating") {
             return;
         }
         dispatch(fetching());
         try {
-            const response = await fetch(loginUrl, {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -27,7 +29,7 @@ function SignIn() {
                 body: JSON.stringify(params),
             });
             const data = await response.json();
-            if (data.status === 400) {
+            if (data.status === 400 || data.status === 401) {
                 dispatch(rejected(data.status, data.message));
                 return;
             }
@@ -37,7 +39,7 @@ function SignIn() {
             localStorage.setItem("jwt", data.body.token);
             dispatch(resolved(data));
         } catch (error) {
-            dispatch(rejected("Erreur réseau"));
+            dispatch(rejected(error.status, "Erreur réseau"));
         }
     }
 
@@ -49,7 +51,7 @@ function SignIn() {
             email: form.elements.username.value,
             password: form.elements.password.value,
         };
-        await fetchLogin(userParams);
+        await fetchLogin(loginUrl, userParams);
         setSubmitting(false);
     };
 
@@ -73,7 +75,7 @@ function SignIn() {
                         <label htmlFor="password">Password</label>
                         <input type="password" id="password" />
                     </div>
-                    {loginError && <span>{loginError}</span>}
+                    {loginError && <ErrorBox message={loginError} />}
                     <div className="input-remember">
                         <input type="checkbox" id="remember-me" />
                         <label htmlFor="remember-me">Remember me</label>

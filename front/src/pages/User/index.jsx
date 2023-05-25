@@ -4,15 +4,15 @@ import { selectUser } from "../../features/user/userSlice";
 import { fetching, resolved, rejected } from "../../features/user/userSlice";
 import Account from "../../components/Account";
 import UserEditForm from "../../components/userEditForm";
+import ErrorBox from "../../components/ErrorBox";
 import "./index.scss";
 
 function User() {
     const dispatch = useDispatch();
     const status = useSelector(selectUser).status;
-    const authError = useSelector(selectUser).error.profile;
+    const error = useSelector(selectUser).error;
+    const authError = error.profile || error.other;
     const data = useSelector(selectUser).data;
-
-    // const jwt = useSelector(selectUser).token;
     const jwt = localStorage.getItem("jwt");
     const [isOpen, setIsOpen] = useState(false);
     const profileUrl = "http://localhost:3001/api/v1/user/profile";
@@ -31,27 +31,32 @@ function User() {
                 },
             });
             const data = await response.json();
-            if (data.status === 401) {
+            if (data.status === 400 || data.status === 401) {
                 dispatch(rejected(data.status, data.message));
                 return;
             }
             dispatch(resolved(data));
         } catch (error) {
-            dispatch(rejected("Erreur réseau"));
+            dispatch(rejected(error.status, "Erreur réseau"));
         }
     }
 
     useEffect(() => {
         fetchProfile(profileUrl, jwt);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profileUrl, jwt]);
+
+    const handleClose = () => {
+        setIsOpen(false);
+    };
 
     return (
         <div className="user_container bg-dark">
             <div className="user-header">
                 {authError ? (
-                    authError
+                    <ErrorBox message={authError} />
                 ) : isOpen ? (
-                    <UserEditForm />
+                    <UserEditForm url={profileUrl} onClose={handleClose} />
                 ) : (
                     <>
                         <h1>

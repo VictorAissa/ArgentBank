@@ -2,11 +2,11 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     status: "void",
-    // token: null,
     data: null,
     error: {
         login: null,
         profile: null,
+        other: null,
     },
 };
 
@@ -64,7 +64,6 @@ const userSlice = createSlice({
         resolved: (draft, action) => {
             if (draft.status === "pending" || draft.status === "updating") {
                 if (action.payload.message === "User successfully logged in") {
-                    // draft.token = action.payload.body.token;
                     draft.status = "resolved";
                     return;
                 }
@@ -92,16 +91,20 @@ const userSlice = createSlice({
                         draft.status = "rejected";
                         return;
                     }
+                    draft.error.other = action.payload.message;
+                    draft.data = null;
+                    draft.status = "rejected";
+                    return;
                 }
                 return;
             },
         },
         eraseData: (draft, action) => {
             draft.status = "void";
-            // draft.token = null;
             draft.data = null;
             draft.error.login = null;
             draft.error.profile = null;
+            draft.error.other = null;
             return;
         },
     },

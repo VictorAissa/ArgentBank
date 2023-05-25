@@ -1,0 +1,21 @@
+@import "../../utils/style/variables.scss";
+
+.error_container {
+    width: 100%;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    .error_code {
+        font-size: 4rem;
+        font-weight: bold;
+        margin: 30px;
+    }
+    .error_comment {
+        font-size: 1.5rem;
+    }
+    .error_link {
+        text-decoration: none;
+        color: $button;
+    }
+}

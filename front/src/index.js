@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import { store } from "./app/store";
+import { store } from "./utils/store";
 import {
     createBrowserRouter,
     createRoutesFromElements,
@@ -13,6 +13,8 @@ import RootLayout from "./layouts/rootLayout";
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import User from "./pages/User";
+import Error from "./pages/Error";
+import RequireAuth from "./utils/authentication/RequireAuth";
 import "./index.scss";
 
 const router = createBrowserRouter(
@@ -20,7 +22,15 @@ const router = createBrowserRouter(
         <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="signin" element={<SignIn />} />
-            <Route path="user" element={<User />} />
+            <Route
+                path="user"
+                element={
+                    <RequireAuth>
+                        <User />
+                    </RequireAuth>
+                }
+            />
+            <Route path="*" element={<Error />} />
         </Route>
     )
 );
