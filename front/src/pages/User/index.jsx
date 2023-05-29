@@ -1,50 +1,30 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../features/user/userSlice";
-import { fetching, resolved, rejected } from "../../features/user/userSlice";
+import { fetchUser } from "../../features/user/userSlice";
 import Account from "../../components/Account";
 import UserEditForm from "../../components/userEditForm";
-import ErrorBox from "../../components/ErrorBox";
+import MessageBox from "../../components/MessageBox";
 import "./index.scss";
 
 function User() {
     const dispatch = useDispatch();
-    const status = useSelector(selectUser).status;
-    const error = useSelector(selectUser).error;
-    const authError = error.profile || error.other;
+    const authError = useSelector(selectUser).error;
     const data = useSelector(selectUser).data;
-    const jwt = localStorage.getItem("jwt");
     const [isOpen, setIsOpen] = useState(false);
     const profileUrl = "http://localhost:3001/api/v1/user/profile";
 
-    async function fetchProfile(url, token) {
-        if (status === "pending" || status === "updating") {
-            return;
-        }
-        dispatch(fetching());
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + token,
-                },
-            });
-            const data = await response.json();
-            if (data.status === 400 || data.status === 401) {
-                dispatch(rejected(data.status, data.message));
-                return;
-            }
-            dispatch(resolved(data));
-        } catch (error) {
-            dispatch(rejected(error.status, "Erreur réseau"));
-        }
-    }
-
+    // Appel de la fonction de requête pour la récupération des données utilisateur après
+    // vérification du token
     useEffect(() => {
-        fetchProfile(profileUrl, jwt);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [profileUrl, jwt]);
+        const params = {
+            url: profileUrl,
+            method: "POST",
+            token: localStorage.getItem("jwt"),
+            userParams: undefined,
+        };
+        dispatch(fetchUser(params));
+    }, [dispatch]);
 
     const handleClose = () => {
         setIsOpen(false);
@@ -53,8 +33,10 @@ function User() {
     return (
         <div className="user_container bg-dark">
             <div className="user-header">
+                {/* Affichage du message d'erreur s'il existe ou du message d'accueil ou du formulaire
+                de modification des données utilisateur */}
                 {authError ? (
-                    <ErrorBox message={authError} />
+                    <MessageBox message={authError} />
                 ) : isOpen ? (
                     <UserEditForm url={profileUrl} onClose={handleClose} />
                 ) : (

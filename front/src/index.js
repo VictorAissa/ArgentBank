@@ -25,6 +25,7 @@ const router = createBrowserRouter(
             <Route
                 path="user"
                 element={
+                    // La page user n'est accessible qu'après verification via RequireAuth
                     <RequireAuth>
                         <User />
                     </RequireAuth>

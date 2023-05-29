@@ -1,65 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectUser } from "../../features/user/userSlice";
-import { fetching, resolved, rejected } from "../../features/user/userSlice";
-import ErrorBox from "../../components/ErrorBox";
+import { fetchUser } from "../../features/user/userSlice";
+import MessageBox from "../../components/MessageBox";
 import "./index.scss";
 
 function SignIn() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const status = useSelector(selectUser).status;
-    const error = useSelector(selectUser).error;
-    const loginError = error.login || error.other;
-    const [submitting, setSubmitting] = useState(false);
-    const loginUrl = "http://localhost:3001/api/v1/user/login";
+    const loginError = useSelector(selectUser).error;
 
-    async function fetchLogin(url, params) {
-        if (status === "pending" || status === "updating") {
-            return;
-        }
-        dispatch(fetching());
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(params),
-            });
-            const data = await response.json();
-            if (data.status === 400 || data.status === 401) {
-                dispatch(rejected(data.status, data.message));
-                return;
-            }
-            if (localStorage.getItem("jwt")) {
-                localStorage.removeItem("jwt");
-            }
-            localStorage.setItem("jwt", data.body.token);
-            dispatch(resolved(data));
-        } catch (error) {
-            dispatch(rejected(error.status, "Erreur réseau"));
-        }
-    }
-
+    /**
+     * Gère la soumission du formulaire de connexion:
+     * lance une requête avec les entrées du formulaire en parametre
+     *
+     * @param {React.FormEvent} event - Soumission du formulaire.
+     */
     const onSubmit = async (event) => {
         event.preventDefault();
-        setSubmitting(true);
         const form = event.currentTarget;
         const userParams = {
             email: form.elements.username.value,
             password: form.elements.password.value,
         };
-        await fetchLogin(loginUrl, userParams);
-        setSubmitting(false);
+        const params = {
+            url: "http://localhost:3001/api/v1/user/login",
+            method: "POST",
+            token: undefined,
+            userParams: userParams,
+        };
+        dispatch(fetchUser(params));
     };
 
+    // Redirection vers le dashboard user en cas de succès de la requête
     useEffect(() => {
-        if (status === "resolved" && submitting) {
+        if (status === "resolved") {
             navigate("/user");
         }
-    }, [navigate, status, submitting]);
+    }, [navigate, status]);
 
     return (
         <div className="signin_container bg-dark">
@@ -75,7 +55,7 @@ function SignIn() {
                         <label htmlFor="password">Password</label>
                         <input type="password" id="password" />
                     </div>
-                    {loginError && <ErrorBox message={loginError} />}
+                    {loginError && <MessageBox message={loginError} />}
                     <div className="input-remember">
                         <input type="checkbox" id="remember-me" />
                         <label htmlFor="remember-me">Remember me</label>

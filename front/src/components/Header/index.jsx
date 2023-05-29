@@ -10,7 +10,14 @@ function Header() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const status = useSelector(selectUser).status;
+    const jwt = localStorage.getItem("jwt");
 
+    /**
+     * Gère la déconnexion: réinitialise les valeurs du state et le token puis
+     * redirige vers la page d'accueil
+     *
+     * @param {React.FormEvent} event - Clic sur le boutton de déconnexion
+     */
     const disconnect = (event) => {
         event.preventDefault();
         dispatch(eraseData());
@@ -29,7 +36,17 @@ function Header() {
                     />
                     <h1 className="sr-only">Argent Bank</h1>
                 </Link>
-                <div>
+                <div className="inside-nav">
+                    {/* Ajout d'un bouton permettant la navigation vers le dashboard user sans passer
+                    par la page Signin */}
+                    {jwt && (
+                        <Link to="/user" className="main-nav-item">
+                            <i className="fa fa-line-chart"></i>
+                            <span>Dashboard</span>
+                        </Link>
+                    )}
+                    {/* Modification du boutton de navigation vers SignIn en boutton de déconnexion
+                    si l'utilisateur est déjà connecté */}
                     {status === "resolved" ? (
                         <Link
                             to="/"

@@ -11,6 +11,10 @@
                 color: #42b983;
             }
         }
+        .inside-nav {
+            display: flex;
+            gap: 1rem;
+        }
         .main-nav-item {
             text-decoration: none;
             margin-right: 0.5rem;

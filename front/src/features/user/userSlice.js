@@ -3,43 +3,50 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     status: "void",
     data: null,
-    error: {
-        login: null,
-        profile: null,
-        other: null,
-    },
+    error: null,
 };
 
-// export function fetchLogin(params) {
-//     return async (dispatch, getState) => {
-//         const status = selectUser(getState()).status;
-//         if (status === "pending" || status === "updating") {
-//             return;
-//         }
-//         dispatch(fetching());
-//         try {
-//             const response = await fetch(
-//                 "http.//localhost:3001/api/v1/user/login",
-//                 {
-//                     method: "POST",
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                     },
-//                     body: JSON.stringify({ params }),
-//                 }
-//             );
-//             const jwt = await response.json();
-//             dispatch(resolved(jwt));
-//         } catch (error) {
-//             dispatch(rejected(error));
-//         }
-//     };
-// }
+/**
+ * Fonction unique permettant les requêtes concernant les utilisateurs; actualise les valeurs du state,
+ * stocke le jwt dans localStorage et renvoie le message de la réponse en cas de succès de la requête
+ *
+ * @param {Object} params - Contient 4 clés : url, method, token, userParams, et les valeurs associées (undefined si valeur inutile).
+ * @returns {String} Message de succès de la requête le cas échéant.
+ */
+export function fetchUser(params) {
+    return async (dispatch, getState) => {
+        const status = selectUser(getState()).status;
+        if (status === "pending" || status === "updating") {
+            return;
+        }
+        dispatch(fetching());
+        try {
+            const response = await fetch(params.url, {
+                method: params.method,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + params.token,
+                },
+                body: JSON.stringify(params.userParams),
+            });
+            const data = await response.json();
+            if (data.status === 400 || data.status === 401) {
+                dispatch(rejected(data.message));
+                return;
+            }
+            if (data.body.token) {
+                localStorage.setItem("jwt", data.body.token);
+            }
+            dispatch(resolved(data));
+            return data.message;
+        } catch (error) {
+            dispatch(rejected("Erreur réseau"));
+        }
+    };
+}
 
-// export function logout(dispatch) {
-//     dispatch(eraseData());
-// }
-
+// Slice des utilisateurs definissant 4 actions qui gèrent la mise à jour du statut, de l'erreur
+// et des données du state ainsi que leurs reducers
 const userSlice = createSlice({
     name: "user",
     initialState,
@@ -50,8 +57,7 @@ const userSlice = createSlice({
                 return;
             }
             if (draft.status === "rejected") {
-                draft.error.login = null;
-                draft.error.profile = null;
+                draft.error = null;
                 draft.status = "pending";
                 return;
             }
@@ -73,38 +79,19 @@ const userSlice = createSlice({
             }
             return;
         },
-        rejected: {
-            prepare: (code, message) => ({
-                payload: { code, message },
-            }),
-            reducer: (draft, action) => {
-                if (draft.status === "pending" || draft.status === "updating") {
-                    if (action.payload.code === 400) {
-                        draft.error.login = action.payload.message;
-                        draft.data = null;
-                        draft.status = "rejected";
-                        return;
-                    }
-                    if (action.payload.code === 401) {
-                        draft.error.profile = action.payload.message;
-                        draft.data = null;
-                        draft.status = "rejected";
-                        return;
-                    }
-                    draft.error.other = action.payload.message;
-                    draft.data = null;
-                    draft.status = "rejected";
-                    return;
-                }
+        rejected: (draft, action) => {
+            if (draft.status === "pending" || draft.status === "updating") {
+                draft.error = action.payload;
+                draft.data = null;
+                draft.status = "rejected";
                 return;
-            },
+            }
+            return;
         },
         eraseData: (draft, action) => {
             draft.status = "void";
             draft.data = null;
-            draft.error.login = null;
-            draft.error.profile = null;
-            draft.error.other = null;
+            draft.error = null;
             return;
         },
     },
