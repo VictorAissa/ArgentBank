@@ -7,6 +7,9 @@
     .user-header {
         color: #fff;
         margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         .edit-button {
             border-color: $button;
             background-color: $button;

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../features/user/userSlice";
 import { fetchUser } from "../../features/user/userSlice";
 import MessageBox from "../MessageBox";
+import Button from "../Button";
 import "./index.scss";
 
 function UserEditForm({ url, onClose }) {
@@ -69,16 +70,12 @@ function UserEditForm({ url, onClose }) {
                 </div>
                 {succesMessage && <MessageBox message={succesMessage} />}
                 <div className="user-edit-form_button-wrapper">
-                    <button type="submit" className="sign-in-button">
-                        Save
-                    </button>
-                    <button
+                    <Button type="submit" content="Save" />
+                    <Button
                         type="reset"
-                        className="sign-in-button"
+                        content="Cancel"
                         onClick={() => onClose()}
-                    >
-                        Cancel
-                    </button>
+                    />
                 </div>
             </form>
         </section>

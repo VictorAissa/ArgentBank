@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../features/user/userSlice";
 import { fetchUser } from "../../features/user/userSlice";
 import Account from "../../components/Account";
-import UserEditForm from "../../components/userEditForm";
+import UserEditForm from "../../components/UserEditForm";
 import MessageBox from "../../components/MessageBox";
+import Button from "../../components/Button";
 import "./index.scss";
 
 function User() {
@@ -46,12 +47,13 @@ function User() {
                             <br />
                             {data?.firstName + " " + data?.lastName}
                         </h1>
-                        <button
-                            className="edit-button"
+
+                        <Button
+                            type="button"
+                            content="Edit Name"
+                            style={{ maxWidth: "120px" }}
                             onClick={() => setIsOpen(true)}
-                        >
-                            Edit Name
-                        </button>
+                        />
                     </>
                 )}
             </div>

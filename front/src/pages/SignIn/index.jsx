@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { selectUser } from "../../features/user/userSlice";
 import { fetchUser } from "../../features/user/userSlice";
 import MessageBox from "../../components/MessageBox";
+import Button from "../../components/Button";
 import "./index.scss";
 
 function SignIn() {
@@ -60,9 +61,7 @@ function SignIn() {
                         <input type="checkbox" id="remember-me" />
                         <label htmlFor="remember-me">Remember me</label>
                     </div>
-                    <button type="submit" className="sign-in-button">
-                        Sign In
-                    </button>
+                    <Button type="submit" content="Sign In" />
                 </form>
             </section>
         </div>

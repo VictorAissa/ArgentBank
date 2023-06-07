@@ -1,6 +1,11 @@
+import Button from "../Button";
 import "./index.scss";
 
 function Account({ title, amount, description }) {
+    const buttonStyleTablet = {
+        minWidth: window.innerWidth > 720 ? "200px" : undefined,
+    };
+
     return (
         <section className="account">
             <div className="account-content-wrapper">
@@ -9,9 +14,11 @@ function Account({ title, amount, description }) {
                 <p className="account-amount-description">{description}</p>
             </div>
             <div className="account-content-wrapper cta">
-                <button className="transaction-button">
-                    View transactions
-                </button>
+                <Button
+                    type="button"
+                    content="View transactions"
+                    style={buttonStyleTablet}
+                />
             </div>
         </section>
     );

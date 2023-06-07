@@ -2,14 +2,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../../features/user/userSlice";
 import { eraseData } from "../../features/user/userSlice";
-
 import logo from "../../assets/argentBankLogo.png";
 import "./index.scss";
 
 function Header() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const status = useSelector(selectUser).status;
+    const userFirstName = useSelector(selectUser).data?.firstName;
     const jwt = localStorage.getItem("jwt");
 
     /**
@@ -37,25 +36,23 @@ function Header() {
                     <h1 className="sr-only">Argent Bank</h1>
                 </Link>
                 <div className="inside-nav">
-                    {/* Ajout d'un bouton permettant la navigation vers le dashboard user sans passer
-                    par la page Signin */}
-                    {jwt && (
-                        <Link to="/user" className="main-nav-item">
-                            <i className="fa fa-line-chart"></i>
-                            <span>Dashboard</span>
-                        </Link>
-                    )}
-                    {/* Modification du boutton de navigation vers SignIn en boutton de déconnexion
-                    si l'utilisateur est déjà connecté */}
-                    {status === "resolved" ? (
-                        <Link
-                            to="/"
-                            className="main-nav-item"
-                            onClick={(event) => disconnect(event)}
-                        >
-                            <i className="fa fa-user-circle"></i>
-                            <span>Sign Out</span>
-                        </Link>
+                    {/* En cas de présence de jwt dans le localStorage, affiche deux liens :
+                    vers le dashboard user - vers Home après déconnexion */}
+                    {jwt ? (
+                        <>
+                            <Link to="/user" className="main-nav-item">
+                                <i className="fa fa-user-circle"></i>
+                                <span>{userFirstName} </span>
+                            </Link>
+                            <Link
+                                to="/"
+                                className="main-nav-item"
+                                onClick={(event) => disconnect(event)}
+                            >
+                                <i class="fa fa-sign-out"></i>
+                                <span>Sign Out</span>
+                            </Link>
+                        </>
                     ) : (
                         <Link to="/signin" className="main-nav-item">
                             <i className="fa fa-user-circle"></i>

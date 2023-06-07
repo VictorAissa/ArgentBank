@@ -1,0 +1,14 @@
+@import "../../utils/style/variables.scss";
+
+.generic-button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    border-color: $button;
+    background-color: $button;
+    color: #fff;
+    cursor: pointer;
+}
