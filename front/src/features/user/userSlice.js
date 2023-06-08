@@ -88,7 +88,7 @@ const userSlice = createSlice({
             }
             return;
         },
-        eraseData: (draft, action) => {
+        eraseData: (draft) => {
             draft.status = "void";
             draft.data = null;
             draft.error = null;
