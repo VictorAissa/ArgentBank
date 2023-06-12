@@ -8,7 +8,7 @@ import "./index.scss";
 function Header() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const userFirstName = useSelector(selectUser).data?.firstName;
+    const userFirstName = useSelector(selectUser).data?.userName;
     const jwt = localStorage.getItem("jwt");
 
     /**
@@ -49,7 +49,7 @@ function Header() {
                                 className="main-nav-item"
                                 onClick={(event) => disconnect(event)}
                             >
-                                <i class="fa fa-sign-out"></i>
+                                <i className="fa fa-sign-out"></i>
                                 <span>Sign Out</span>
                             </Link>
                         </>
